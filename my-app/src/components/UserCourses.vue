@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, Ref, ref } from "vue";
 import { mapGetters } from "vuex";
 import { api } from "@/services/api";
 import { Course } from "@/types/Course";
@@ -37,10 +37,13 @@ export default defineComponent({
   components: {
     CourseCard
   },
-  data(): ComponentState {
+  setup(props, { attrs, slots, emit }) {
+    const courses: Ref<Course[]> = ref([]);
+    const totalCourses = ref(0);
+
     return {
-      courses: [],
-      totalCourses: 0
+      courses,
+      totalCourses
     };
   },
   mounted() {
