@@ -18,15 +18,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, ref } from "vue";
-import { mapGetters } from "vuex";
+import { computed, defineComponent, Ref, ref, onMounted, watch } from "vue";
+import { useStore } from "vuex";
 import { api } from "@/services/api";
 import { Course } from "@/types/Course";
 import CourseCard from "@/components/CourseCard.vue";
+import { useRoute } from "vue-router";
 interface ComponentState {
   courses: Course[];
   totalCourses: number;
 }
+
 export default defineComponent({
   props: {
     perPage: {
@@ -37,46 +39,41 @@ export default defineComponent({
   components: {
     CourseCard
   },
-  setup(props, { attrs, slots, emit }) {
+  setup(props) {
+    const store = useStore();
+    const route = useRoute();
+
     const courses: Ref<Course[]> = ref([]);
     const totalCourses = ref(0);
 
-    return {
-      courses,
-      totalCourses
-    };
-  },
-  mounted() {
-    this.getCourses();
-  },
-  watch: {
-    $route() {
-      this.getCourses();
+    async function getCourses() {
+      const response = await api.getUserCourses({
+        id: store.getters.userId,
+        page: route.query.page,
+        perPage: props.perPage
+      });
+      courses.value = courses.value.concat(response);
+      totalCourses.value = response.total;
     }
-  },
-  computed: {
-    ...mapGetters({
-      userId: "userId"
-    }),
-    coursesInProgress(): Course[] {
-      return this.courses.filter(
+
+    onMounted(getCourses);
+
+    watch(() => route.query, getCourses);
+
+    const coursesInProgress = computed(() => {
+      return courses.value.filter(
         course => course.progress > 0 && course.progress < 100
       );
-    },
-    canLoadMore(): boolean {
-      return this.totalCourses > this.courses.length;
-    }
-  },
-  methods: {
-    async getCourses() {
-      const { courses, total } = await api.getUserCourses({
-        id: this.userId,
-        page: this.$route.query.page,
-        perPage: this.perPage
-      });
-      this.courses = this.courses.concat(courses);
-      this.totalCourses = total;
-    }
+    });
+
+    const canLoadMore = computed(() => {
+      return totalCourses.value > courses.value.length;
+    });
+
+    return {
+      courses: coursesInProgress,
+      canLoadMore
+    };
   }
 });
 </script>
