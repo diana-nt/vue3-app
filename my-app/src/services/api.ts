@@ -1,4 +1,26 @@
-import courses from "./courses.json";
+/* eslint-disable */
+export const api = {
+  trackEvent({
+    user,
+    event,
+    payload,
+  }: {
+    user: string;
+    event: string;
+    payload?: {};
+  }) {
+    return new Promise(resolve => {
+      resolve();
+    });
+  },
+  addCourse(course: string) {
+    return new Promise(resolve => {
+      resolve();
+    });
+  },
+};
+
+/*import courses from "./courses.json";
 import { Course } from "@/types/Course";
 
 interface Response {
@@ -6,7 +28,7 @@ interface Response {
   total: number;
 }
 
-/* eslint-disable */
+/!* eslint-disable *!/
 export const api = {
   getUserCourses({
     id,
@@ -27,4 +49,4 @@ export const api = {
       });
     });
   }
-};
+};*/
